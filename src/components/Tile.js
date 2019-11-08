@@ -1,61 +1,46 @@
 import React from 'react';
+import gameEvents from '../gameEvents';
 
 export default class Tile extends React.Component {
 
-    /**
-     * Props:
-     * - mine: boolean
-     * - x: integer, x coordinate
-     * - y: integer, y coordinate
-     * @param {*} props
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            isRevealed: false,
-            hasFlag: false,
-            nearbyMines: 0
-        };
-    }
-
     leftClick() {
-        if (!this.state.isRevealed) {
-            this.setState({
-                isRevealed: true
-            });
+        if (this.props.gameOver || this.props.value.hasFlag || this.props.value.isRevealed) {
+            return;
         }
-        if (this.props.mine) {
-            // boom!
-        } else if (this.state.nearbyMines == 0) {
-            // click all neighbouring tiles
-        }
+
+        this.props.handleEvent(gameEvents.reveal, this.props.value);
     }
 
-    rightClick() {
-        if (!this.state.isRevealed) {
-            this.setState({
-                hasFlag: !this.state.hasFlag
-            });
+    rightClick(e) {
+        e.preventDefault();
+        if (this.props.gameOver || this.props.value.isRevealed) {
+            return;
         }
+
+        this.props.handleEvent(gameEvents.addflag, this.props.value);
     }
 
     doubleClick() {
-        // click on all neighbouring tiles
+        if (this.props.gameOver) {
+            return;
+        }
+        this.props.handleEvent(gameEvents.neighbours, this.props.value);
     }
 
     render() {
-        return (this.state.isRevealed) ? this.renderRevealed() : this.renderHidden();
+        return (this.props.value.isRevealed === true) ? this.renderRevealed() : this.renderHidden();
     }
 
     renderRevealed() {
-        const { nearbyMines } = this.state;
+        const { nearbyMines, mine } = this.props.value;
+        const nearbyMinesClass = `nearbymines-${nearbyMines}`;
         return (
-            <td className="tile revealed">
+            <td className="tile revealed" onDoubleClick={this.doubleClick.bind(this)} onContextMenu={this.rightClick.bind(this)}>
                 <div>
-                    { this.props.hasMine ? (
-                        '💣'
+                    { mine ? (
+                        <span className="mine" role="img" aria-label="bomb">💣</span>
                     ) : (
-                        (nearbyMines > 0) ? nearbyMines : ''
+                        (nearbyMines > 0) ? <span className={nearbyMinesClass}>{nearbyMines}</span> : ''
                     )}
                 </div>
             </td>
@@ -63,10 +48,10 @@ export default class Tile extends React.Component {
     }
 
     renderHidden() {
-        const { hasFlag } = this.state;
+        const { hasFlag } = this.props.value;
         return (
-            <td className="tile hidden">
-                <div>{ hasFlag ? '🚩' : '' }</div>
+            <td className="tile hidden" onClick={this.leftClick.bind(this)} onContextMenu={this.rightClick.bind(this)}>
+                <div>{ hasFlag ? <span className="flag" role="img" aria-label="flag">🚩</span> : '' }</div>
             </td>
         );
     }

@@ -1,12 +1,11 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import Board from './components/Board';
+import Game from './components/Game';
 
 function App() {
   return (
     <div className="App">
-      <Board width="10" height="10" mines="8" />
+      <Game width="9" height="9" mines="10" />
     </div>
   );
 }

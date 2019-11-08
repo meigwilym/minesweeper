@@ -21,17 +21,57 @@
   color: #09d3ac;
 }
 
+table#board {
+  border-collapse:collapse;
+  margin: 0 auto;
+}
+.tile{
+  padding:1px;
+  background-color: #797979;
+}
 .tile div {
   width:15px;
   height: 15px;
-  background: darkgray;
+  background: #c7cdc2;
   border-style: solid;
   border-width: 2px;
-  border-top-color:lightgray;
-  border-left-color: lightgray;
-  border-bottom-color:gray;
-  border-right-color:gray;
+  border-top-color:#f8ffeb;
+  border-left-color: #f8ffeb;
+  border-bottom-color:#887983;
+  border-right-color:#887983;
+  font-size: 0.8em;
+  font-weight: bold;
 }
-.tile.revealed {
+.mine{
+  color: red;
 
+}
+.flag {
+  color: blue;
+  font-weight: bold;
+}
+.nearbymines-1{
+  color: blue;
+}
+.nearbymines-2{
+  color: green;
+}
+.nearbymines-3{
+  color: red;
+}
+.nearbymines-4{
+  color: darkblue;
+}
+.nearbymines-5{
+  color: darkred;
+}
+.nearbymines-6{
+  color: teal;
+}
+.nearbymines-7{
+  color: rebeccapurple;
+}
+.tile.revealed div {
+  background-color:transparent;
+  border-color:transparent;
 }
