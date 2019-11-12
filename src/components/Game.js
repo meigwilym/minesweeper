@@ -2,6 +2,7 @@ import React from 'react';
 import Board from './Board';
 import Clock from './Clock';
 import FlagDisplay from './FlagDislay';
+import GameButton from './GameButton';
 import { createMines } from '../helpers';
 import { getNeighbours } from '../helpers';
 import gameStatus from '../gameStatus';
@@ -11,8 +12,7 @@ export default class Game extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            gameOver: false,
-            gameStatus: gameStatus.inProgress,
+            gameStatus: gameStatus.yetToStart,
             flagCount: 0,
             beginner: {
                 height: 9,
@@ -28,16 +28,20 @@ export default class Game extends React.Component {
                 height: 16,
                 width: 40,
                 mines: 99
-            }
+            },
+            tiles: []
         };
         this.state.tiles = this.createTiles();
     }
 
+    componentDidMount() {
+        // this.newGame();
+    }
+
     handleGameOver(result) {
-        console.log(result);
+        console.log('game over', result);
         if(this.state.gameStatus !== result) {
             this.setState({
-                gameOver: true,
                 gameStatus: result
             });
         }
@@ -47,6 +51,46 @@ export default class Game extends React.Component {
         this.setState({
             flagCount: this.state.flagCount + val
         });
+    }
+
+    newGame() {
+        this.setState({
+            gameStatus: gameStatus.yetToStart,
+            tiles: this.createTiles(),
+            flagCount: 0,
+        });
+    }
+
+    startGame() {
+        if (this.state.gameStatus === gameStatus.yetToStart) {
+            this.setState({
+                gameStatus: gameStatus.inProgress
+            });
+        }
+    }
+
+    render() {
+        const { tiles } = this.state;
+        const { height, width, mines } = this.state.beginner;
+        return (
+            <div className="game">
+                <h1>Minesweeper</h1>
+                <div style={{display:'flex',flexDirection:'row'}}>
+                    <Clock gameStatus={this.state.gameStatus} />
+                    <GameButton gameStatus={this.state.gameStatus} onClick={this.newGame.bind(this)} />
+                    <FlagDisplay flags={this.state.flagCount} />
+                </div>
+                <Board
+                    height={height}
+                    width={width}
+                    mines={mines}
+                    tiles={tiles}
+                    gameStatus={this.state.gameStatus}
+                    startGame={this.startGame.bind(this)}
+                    flagCount={this.handleFlagCount.bind(this)}
+                    onGameOver={this.handleGameOver.bind(this)} />
+            </div>
+        );
     }
 
     createTiles() {
@@ -84,47 +128,5 @@ export default class Game extends React.Component {
         }
 
         return tiles;
-    }
-
-    newGame() {
-        console.log('new game');
-        this.setState({
-            gameOver: false,
-            gameStatus: gameStatus.inProgress,
-            tiles: this.createTiles(),
-            flagCount: 0,
-        });
-    }
-
-    render() {
-        const { gameOver, tiles } = this.state;
-        const { height, width, mines } = this.state.beginner;
-        const gameButton = this.renderGameButton();
-        return (
-            <div className="game">
-                <h1>Minesweeper</h1>
-                <Clock tick={!this.state.gameOver} />
-                <p><span className="btn" onClick={this.newGame.bind(this)}>{gameButton}</span></p>
-                <FlagDisplay flags={this.state.flagCount} />
-                <Board
-                    height={height}
-                    width={width}
-                    mines={mines}
-                    gameOver={gameOver}
-                    tiles={tiles}
-                    flagCount={this.handleFlagCount.bind(this)}
-                    onGameOver={this.handleGameOver.bind(this)} />
-            </div>
-        );
-    }
-
-    renderGameButton() {
-        if (this.state.gameStatus === gameStatus.inProgress) {
-            return (<span className="btn" onClick={this.newGame.bind(this)}>Game On!</span>);
-        } else if (this.state.gameStatus === gameStatus.lose) {
-            return (<span className="btn" onClick={this.newGame.bind(this)}>Lose!</span>);
-        } else if (this.state.gameStatus === gameStatus.win) {
-            return (<span className="btn" onClick={this.newGame.bind(this)}>Win!</span>);
-        }
     }
 }

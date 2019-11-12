@@ -1,10 +1,9 @@
 import React from 'react';
 
 function FlagDisplay({ flags }) {
-
     return (
-        <div>
-            Flags: { flags }
+        <div id="FlagDisplay">
+            Flags: <span>{ flags }</span>
         </div>);
 }
 

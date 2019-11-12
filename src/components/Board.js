@@ -8,16 +8,21 @@ export default class Board extends React.Component {
 
     constructor(props) {
         super(props);
+
         this.state = {
-            gameOver: props.gameOver,
+            gameStatus: props.gameStatus,
             tiles: props.tiles,
-            flags: 0, // number of flags
-            revealed: 0,
+            flags: 0 // number of flags
         };
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         this.checkWin();
+        if(this.state.tiles !== this.props.tiles ) {
+            this.setState({
+                tiles: this.props.tiles
+            });
+        }
     }
 
     handleEvent(event, props) {
@@ -37,7 +42,6 @@ export default class Board extends React.Component {
     }
 
     reveal(x, y) {
-        console.log(this.state.tiles[x][y]);
         this.setState(state => {
             state.tiles[x][y].isRevealed = true;
             return state;
@@ -81,30 +85,50 @@ export default class Board extends React.Component {
         this.setState(state => {
             state.tiles[props.x][props.y].hasFlag = !state.tiles[props.x][props.y].hasFlag;
             return state;
+        }, () => {
+            const amount = this.state.tiles[props.x][props.y].hasFlag ? 1 : -1;
+            this.props.flagCount(amount);
         });
-
-        const amount = props.hasFlag ? -1 : 1;
-        this.props.flagCount(amount);
     }
 
-    renderBoardRow(tiles) {
-        return tiles.map((row, i) => {
-            return (
-                <tr key={i}>
-                    { row.map((v, j) => <Tile value={v} key={j} gameOver={this.props.gameOver} handleEvent={this.handleEvent.bind(this)} />) }
-                </tr>
-            );
-        });
+    leftClick() {
+        if (this.props.gameStatus === gameStatus.yetToStart) {
+            this.props.startGame();
+        }
+    }
+
+    rightClick() {
+
+    }
+
+    doubleClick() {
+
     }
 
     render() {
-        const tiles = this.state.tiles
         return (
             <table id="board">
                 <tbody>
-                    {this.renderBoardRow(this.props.tiles)}
+                    {this.renderBoardRow()}
                 </tbody>
             </table>
         );
+    }
+
+    renderBoardRow() {
+        return this.state.tiles.map((row, i) => {
+            return (
+                <tr key={i}>
+                    {row.map((v, j) => (
+                        <Tile value={v} key={j}
+                            gameOver={this.props.gameOver}
+                            handleEvent={this.handleEvent.bind(this)}
+                            leftClick={this.leftClick.bind(this)}
+                            rightClick={this.rightClick.bind(this)}
+                            doubleClick={this.doubleClick.bind(this)} />)
+                    )}
+                </tr>
+            );
+        });
     }
 }

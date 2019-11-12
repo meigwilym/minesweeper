@@ -7,7 +7,7 @@ export default class Tile extends React.Component {
         if (this.props.gameOver || this.props.value.hasFlag || this.props.value.isRevealed) {
             return;
         }
-
+        this.props.leftClick();
         this.props.handleEvent(gameEvents.reveal, this.props.value);
     }
 
