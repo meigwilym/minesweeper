@@ -11,10 +11,10 @@ export default function GameButton(props) {
             gameButton = 'Game On!';
             break;
         case gameStatus.lose:
-            gameButton = 'Lose!';
+            gameButton = 'You Lose!';
             break;
         case gameStatus.win:
-            gameButton = 'Win!';
+            gameButton = 'You Win!';
             break;
         default:
             gameButton = 'Default';

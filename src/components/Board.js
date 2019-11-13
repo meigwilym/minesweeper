@@ -91,7 +91,7 @@ export default class Board extends React.Component {
         });
     }
 
-    leftClick() {
+    leftClick(e) {
         if (this.props.gameStatus === gameStatus.yetToStart) {
             this.props.startGame();
         }
@@ -121,7 +121,6 @@ export default class Board extends React.Component {
                 <tr key={i}>
                     {row.map((v, j) => (
                         <Tile value={v} key={j}
-                            gameOver={this.props.gameOver}
                             handleEvent={this.handleEvent.bind(this)}
                             leftClick={this.leftClick.bind(this)}
                             rightClick={this.rightClick.bind(this)}

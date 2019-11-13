@@ -44,3 +44,17 @@ export function getNeighbours(tiles, x, y) {
 export function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
 }
+
+const timeString = 'time.';
+
+export function getTime(level) {
+    return localStorage.getItem(timeString+level);
+}
+
+export function setTime(level, time) {
+    localStorage.setItem(timeString+level, time);
+}
+
+export function isFastestTime(level, time) {
+    return getTime(level) < time;
+}

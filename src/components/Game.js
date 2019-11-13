@@ -3,9 +3,9 @@ import Board from './Board';
 import Clock from './Clock';
 import FlagDisplay from './FlagDislay';
 import GameButton from './GameButton';
-import { createMines } from '../helpers';
-import { getNeighbours } from '../helpers';
+import { createMines, getNeighbours } from '../helpers';
 import gameStatus from '../gameStatus';
+import { gameTypes, gameDimensions } from '../gameTypes';
 
 export default class Game extends React.Component {
 
@@ -14,21 +14,7 @@ export default class Game extends React.Component {
         this.state = {
             gameStatus: gameStatus.yetToStart,
             flagCount: 0,
-            beginner: {
-                height: 9,
-                width: 9,
-                mines: 10
-            },
-            intermediate: {
-                height: 16,
-                width: 16,
-                mines: 40
-            },
-            expert: {
-                height: 16,
-                width: 40,
-                mines: 99
-            },
+            gameType: gameTypes.beginner,
             tiles: []
         };
         this.state.tiles = this.createTiles();
@@ -44,6 +30,9 @@ export default class Game extends React.Component {
             this.setState({
                 gameStatus: result
             });
+        }
+        if (this.state.gameStatus === gameStatus.win) {
+            // localStorage.setItem('score', {});
         }
     }
 
@@ -71,7 +60,7 @@ export default class Game extends React.Component {
 
     render() {
         const { tiles } = this.state;
-        const { height, width, mines } = this.state.beginner;
+        const { height, width, mines } = gameDimensions[this.state.gameType];
         return (
             <div className="game">
                 <h1>Minesweeper</h1>
@@ -94,7 +83,7 @@ export default class Game extends React.Component {
     }
 
     createTiles() {
-        const { width, height, mines } = this.state.beginner;
+        const { width, height, mines } = gameDimensions[this.state.gameType];
         const boardMines = createMines(width, height, mines);
         const tiles = [];
 
