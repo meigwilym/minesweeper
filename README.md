@@ -1,3 +1,11 @@
+# React Minesweeper
+
+This is a project to emulate the famous Minesweeper game using React. 
+
+I built it as a learning project to better understand React. 
+
+## React README
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
