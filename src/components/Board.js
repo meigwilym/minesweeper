@@ -1,7 +1,6 @@
 import React from 'react';
 import Tile from './Tile';
-import gameEvents from '../gameEvents';
-import { getNeighbours } from '../helpers';
+import { getNeighbours, getElementXY, createBoard } from '../helpers';
 import gameStatus from '../gameStatus';
 
 export default class Board extends React.Component {
@@ -11,43 +10,37 @@ export default class Board extends React.Component {
 
         this.state = {
             gameStatus: props.gameStatus,
-            tiles: props.tiles,
+            tiles: createBoard(this.props.width, this.props.height, this.props.mines),
             flags: 0 // number of flags
         };
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        this.checkWin();
-        if(this.state.tiles !== this.props.tiles ) {
+        // check for win
+        if (this.props.gameStatus === gameStatus.inProgress) {
+            const totalTiles = this.props.height * this.props.width;
+            const tilesRevealedCount = this.state.tiles.flat().filter(v => v.isRevealed).length;
+            if (this.props.mines === (totalTiles - tilesRevealedCount)) {
+                this.props.onGameOver(gameStatus.win);
+            }
+        }
+        // generate new tiles when !yetToStart -> yetToStart
+        if (prevProps.gameStatus !== gameStatus.yetToStart && this.props.gameStatus === gameStatus.yetToStart) {
             this.setState({
-                tiles: this.props.tiles
+                tiles: createBoard(this.props.width, this.props.height, this.props.mines)
             });
         }
     }
 
-    handleEvent(event, props) {
-        switch (event) {
-            case gameEvents.reveal:
-                this.reveal(props.x, props.y);
-                break;
-            case gameEvents.addflag:
-                this.countFlag(props);
-                break;
-            case gameEvents.neighbours:
-                this.revealNeighbours(props.x, props.y);
-                break;
-            default:
-                console.log('handling event board default', event, props);
-        }
-    }
-
+    // reveal a tile, and if it's empty, reveal its neighbours
     reveal(x, y) {
         this.setState(state => {
             state.tiles[x][y].isRevealed = true;
             return state;
         }, () => {
-
+            
             if (this.state.tiles[x][y].mine) {
+                // @todo show all other mines
                 this.props.onGameOver(gameStatus.lose);
                 return;
             }
@@ -56,13 +49,6 @@ export default class Board extends React.Component {
                 this.revealNeighbours(x, y);
             }
         });
-    }
-
-    checkWin() {
-        const totalTiles = this.props.height * this.props.width;
-        if (this.props.mines === (totalTiles - this.getTilesRevealed())) {
-            this.props.onGameOver(gameStatus.win);
-        }
     }
 
     revealNeighbours(x, y) {
@@ -74,60 +60,73 @@ export default class Board extends React.Component {
         }
     }
 
-    getTilesRevealed() {
-        return this.state.tiles.flat().filter(v => v.isRevealed).length;
-    }
-
-    countFlag(props) {
-        if (this.state.tiles[props.x][props.y].isRevealed) {
+    countFlag(x, y) {
+        if (this.state.tiles[x][y].isRevealed) {
             return;
         }
         this.setState(state => {
-            state.tiles[props.x][props.y].hasFlag = !state.tiles[props.x][props.y].hasFlag;
+            state.tiles[x][y].hasFlag = !state.tiles[x][y].hasFlag;
             return state;
         }, () => {
-            const amount = this.state.tiles[props.x][props.y].hasFlag ? 1 : -1;
+            const amount = this.state.tiles[x][y].hasFlag ? 1 : -1;
             this.props.flagCount(amount);
         });
     }
 
     leftClick(e) {
+        const{ x, y } = getElementXY(e.currentTarget);
+        const tile = this.state.tiles[x][y];
         if (this.props.gameStatus === gameStatus.yetToStart) {
             this.props.startGame();
         }
+        if (tile.hasFlag || this.isGameOver()) {
+            return;
+        }
+        this.reveal(x, y);
     }
 
-    rightClick() {
-
+    rightClick(e) {
+        e.preventDefault();
+        const{ x, y } = getElementXY(e.currentTarget);
+        const tile = this.state.tiles[x][y];
+        if (tile.isRevealed || this.isGameOver()) {
+            return;
+        }
+        this.countFlag(x, y);
     }
 
-    doubleClick() {
+    doubleClick(e) {
+        if (this.isGameOver()) {
+            return;
+        }
+        const{ x, y } = getElementXY(e.currentTarget);
+        this.revealNeighbours(x, y);
+    }
 
+    isGameOver() {
+        return this.props.gameStatus === gameStatus.win || this.props.gameStatus === gameStatus.lose;
     }
 
     render() {
         return (
             <table id="board">
                 <tbody>
-                    {this.renderBoardRow()}
+                    {this.state.tiles.map((row, i) => {
+                        return (
+                            <tr key={i}>
+                                {row.map((v, j) => (
+                                    <Tile 
+                                        value={v} 
+                                        key={v.x * row.length + v.y}
+                                        leftClick={this.leftClick.bind(this)}
+                                        rightClick={this.rightClick.bind(this)}
+                                        doubleClick={this.doubleClick.bind(this)} />)
+                                )}
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         );
-    }
-
-    renderBoardRow() {
-        return this.state.tiles.map((row, i) => {
-            return (
-                <tr key={i}>
-                    {row.map((v, j) => (
-                        <Tile value={v} key={j}
-                            handleEvent={this.handleEvent.bind(this)}
-                            leftClick={this.leftClick.bind(this)}
-                            rightClick={this.rightClick.bind(this)}
-                            doubleClick={this.doubleClick.bind(this)} />)
-                    )}
-                </tr>
-            );
-        });
     }
 }

@@ -3,7 +3,6 @@ import Board from './Board';
 import Clock from './Clock';
 import FlagDisplay from './FlagDislay';
 import GameButton from './GameButton';
-import { createMines, getNeighbours } from '../helpers';
 import gameStatus from '../gameStatus';
 import { gameTypes, gameDimensions } from '../gameTypes';
 
@@ -14,18 +13,11 @@ export default class Game extends React.Component {
         this.state = {
             gameStatus: gameStatus.yetToStart,
             flagCount: 0,
-            gameType: gameTypes.beginner,
-            tiles: []
+            gameType: gameTypes.beginner
         };
-        this.state.tiles = this.createTiles();
-    }
-
-    componentDidMount() {
-        // this.newGame();
     }
 
     handleGameOver(result) {
-        console.log('game over', result);
         if(this.state.gameStatus !== result) {
             this.setState({
                 gameStatus: result
@@ -45,8 +37,7 @@ export default class Game extends React.Component {
     newGame() {
         this.setState({
             gameStatus: gameStatus.yetToStart,
-            tiles: this.createTiles(),
-            flagCount: 0,
+            flagCount: 0
         });
     }
 
@@ -59,7 +50,6 @@ export default class Game extends React.Component {
     }
 
     render() {
-        const { tiles } = this.state;
         const { height, width, mines } = gameDimensions[this.state.gameType];
         return (
             <div className="game">
@@ -73,49 +63,11 @@ export default class Game extends React.Component {
                     height={height}
                     width={width}
                     mines={mines}
-                    tiles={tiles}
                     gameStatus={this.state.gameStatus}
                     startGame={this.startGame.bind(this)}
                     flagCount={this.handleFlagCount.bind(this)}
                     onGameOver={this.handleGameOver.bind(this)} />
             </div>
         );
-    }
-
-    createTiles() {
-        const { width, height, mines } = gameDimensions[this.state.gameType];
-        const boardMines = createMines(width, height, mines);
-        const tiles = [];
-
-        for (let i = 0; i < width; i++) {
-            const row = [];
-            for (let j = 0; j < height; j++) {
-                row.push({
-                    x: i,
-                    y: j,
-                    mine: (boardMines.hasOwnProperty(i) && boardMines[i].includes(j)),
-                    nearbyMines: 0,
-                    isRevealed: false,
-                    hasFlag: false
-                });
-            }
-            tiles.push(row);
-        }
-
-        // check for mines, and count
-        for (let i = 0; i < width; i++) {
-            for (let j = 0; j < height; j++) {
-                if (!tiles[i][j].mine) {
-                    const neighbours = getNeighbours(tiles, i, j);
-                    for (const neighbourTile of neighbours) {
-                        if (neighbourTile.mine) {
-                            tiles[i][j].nearbyMines = tiles[i][j].nearbyMines + 1;
-                        }
-                    }
-                }
-            }
-        }
-
-        return tiles;
     }
 }

@@ -16,7 +16,7 @@ export default class Clock extends React.Component {
         }
         // either clicks on a mine or clears empty tiles.
         // change in game state from inProgress to win/lose
-        if (oldProps.gameStatus === gameStatus.inProgress && this.props.gameStatus !== gameStatus.inProgress){
+        if (oldProps.gameStatus === gameStatus.inProgress && this.props.gameStatus !== gameStatus.inProgress) {
             this.stop();
         }
         // game is restarted mid game with no win/loss

@@ -5,26 +5,6 @@ export function makeBoard(maxWidth, maxHeight, mineTotal) {
     return mineCoords;
 }
 
-export function createMines(maxWidth, maxHeight, mineTotal) {
-    const mineCoords = {};
-    for (let i = 0; i < mineTotal; i++) {
-        let x = getRandomInt(maxWidth);
-        let y = getRandomInt(maxHeight);
-
-        if (typeof mineCoords[x] == 'undefined') {
-            mineCoords[x] = [];
-        }
-
-        if (!mineCoords[x].includes(y)) {
-            mineCoords[x].push(y);
-        } else {
-            i--;
-        }
-    }
-
-    return mineCoords;
-}
-
 // returns all neighbours of a tile
 export function getNeighbours(tiles, x, y) {
     const neighbours = [];
@@ -57,4 +37,74 @@ export function setTime(level, time) {
 
 export function isFastestTime(level, time) {
     return getTime(level) < time;
+}
+
+export function emptyTile(i, j) {
+    return {
+        x: i,
+        y: j,
+        mine: false, 
+        nearbyMines: 0,
+        isRevealed: false,
+        hasFlag: false
+    };
+}
+
+export function createTiles(width, height) {
+    const tiles = [];
+
+    for (let i = 0; i < width; i++) {
+        const row = [];
+        for (let j = 0; j < height; j++) {
+            row.push(emptyTile(i, j));
+        }
+        tiles.push(row);
+    }
+    return tiles;
+}
+
+export function createMines(tiles, mineTotal) {
+    let plantedMines = 0;
+    while (plantedMines < mineTotal) {
+        let x = getRandomInt(tiles[0].length);
+        let y = getRandomInt(tiles.length);
+
+        if (tiles[x][y].mine === false) {
+            tiles[x][y].mine = true;
+            plantedMines++;
+        }
+    }
+    return tiles;
+}
+
+export function checkNeighbours(tiles) {
+    // check for mines, and count
+    for (let i = 0; i < tiles[0].length; i++) {
+        for (let j = 0; j < tiles.length; j++) {
+            if (!tiles[i][j].mine) {
+                const neighbours = getNeighbours(tiles, i, j);
+                for (const neighbourTile of neighbours) {
+                    if (neighbourTile.mine) {
+                        tiles[i][j].nearbyMines = tiles[i][j].nearbyMines + 1;
+                    }
+                }
+            }
+        }
+    }
+    return tiles;
+}
+
+export function createBoard(width, height, mines) {
+    const tiles = createTiles(width, height);
+    const boardMines = createMines(tiles, mines);
+    const boardMinesNeighbours = checkNeighbours(boardMines);
+
+    return boardMinesNeighbours;
+}
+
+export function getElementXY(target) {
+    let { x , y } = target.dataset;
+    x = parseInt(x);
+    y = parseInt(y);
+    return { x, y };
 }
