@@ -1,10 +1,12 @@
 import React from 'react';
 
-function FlagDisplay({ flags }) {
+export default function FlagDisplay({ flags }) {
+    let printedFlag = flags.toString();
+    if (flags < 10) {
+        printedFlag = `0${printedFlag}`;
+    }
     return (
         <div id="FlagDisplay">
-            Flags: <span>{ flags }</span>
+            {printedFlag}
         </div>);
 }
-
-export default FlagDisplay;

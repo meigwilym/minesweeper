@@ -54,10 +54,18 @@ export default class Clock extends React.Component {
     }
 
     render() {
-      return (
-        <div id="clock">
-            Time: { this.state.time }
-        </div>
-      );
+        const { time } = this.state;
+        let printedTime = time.toString();
+
+        if (time < 100 && time > 9) {
+            printedTime = `0${printedTime}`;
+        } else if (time < 10) {
+            printedTime = `00${printedTime}`;
+        }
+        return (
+            <div id="clock">
+                {printedTime}
+            </div>
+        );
     }
   }
