@@ -33,14 +33,17 @@ export default class Board extends React.Component {
     }
 
     // reveal a tile, and if it's empty, reveal its neighbours
-    reveal(x, y) {
+    reveal(x, y, recursion = false) {
         this.setState(state => {
             state.tiles[x][y].isRevealed = true;
             return state;
         }, () => {
-            
+            if (recursion) {
+                return;
+            }
             if (this.state.tiles[x][y].mine) {
                 // @todo show all other mines
+                this.revealBombs();
                 this.props.onGameOver(gameStatus.lose);
                 return;
             }
@@ -57,6 +60,13 @@ export default class Board extends React.Component {
             if (!tile.isRevealed && !tile.hasFlag) {
                 this.reveal(tile.x, tile.y);
             }
+        }
+    }
+
+    revealBombs() {
+        const tiles = this.state.tiles.flat().filter(v => v.mine);
+        for (const tile of tiles) {
+            this.reveal(tile.x, tile.y, true);
         }
     }
 
@@ -115,8 +125,8 @@ export default class Board extends React.Component {
                         return (
                             <tr key={i}>
                                 {row.map((v, j) => (
-                                    <Tile 
-                                        value={v} 
+                                    <Tile
+                                        value={v}
                                         key={v.x * row.length + v.y}
                                         leftClick={this.leftClick.bind(this)}
                                         rightClick={this.rightClick.bind(this)}
